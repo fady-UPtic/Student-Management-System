@@ -1,0 +1,237 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <thread>
+#include <chrono>
+#include <limits>
+
+using namespace std;
+
+// -----------------------# Student Structure
+struct Student
+{
+    int id;
+    string fullName;
+    int age;
+    float grade;
+};
+
+// -----------------------# Function Declarations
+void showMenu();
+void handleUserChoice();
+
+void addStudent();
+void displayAllStudents();
+void findStudentByID();
+void deleteStudentByID();
+
+// -----------------------# Global Variables
+vector<Student> studentRecords;
+
+// -----------------------# Show Menu Function
+void showMenu()
+{
+
+    cout << "\n\033[33m==== Student Management System ====\033[0m" << endl;
+    cout << "1) Add a New Student" << endl;
+    cout << "2) Display All Students" << endl;
+    cout << "3) Find Student by ID" << endl;
+    cout << "4) Delete Student by ID" << endl;
+    cout << "0) Exit" << endl;
+}
+
+// -----------------------# Handle User Choice
+void handleUserChoice()
+{
+    cout << "\nChoose an option: ";
+    int choice;
+    cin >> choice;
+
+    while (choice < 0 || choice > 4)
+    {
+        this_thread::sleep_for(chrono::milliseconds(300));
+        cout << "Invalid choice, please try again: ";
+        cin >> choice;
+    }
+
+    switch (choice)
+    {
+    case 1:
+        addStudent();
+        break;
+    case 2:
+        displayAllStudents();
+        break;
+    case 3:
+        findStudentByID();
+        break;
+    case 4:
+        deleteStudentByID();
+        break;
+    case 0:
+        cout << "Exiting program..." << endl;
+        exit(0);
+    }
+}
+
+// -----------------------# Add Student
+void addStudent()
+{
+    int id;
+    string fullName;
+    int age;
+    float grade;
+
+    cout << "\n\033[33m---- Add a New Student ----\033[0m" << endl;
+
+    // Input ID
+    cout << "Enter Student ID: ";
+    cin >> id;
+    while (id < 0)
+    {
+        cout << "Invalid ID. Enter a positive number: ";
+        cin >> id;
+    }
+
+    // Check for duplicate ID
+    while (true)
+    {
+        auto existing = find_if(studentRecords.begin(), studentRecords.end(),
+                                [id](const Student &s)
+                                { return s.id == id; });
+        if (existing == studentRecords.end())
+            break;
+
+        cout << "This ID already exists. Enter a different ID: ";
+        cin >> id;
+    }
+
+    // Input Name
+    cout << "Enter Full Name: ";
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    getline(cin, fullName);
+
+    // Input Age
+    cout << "Enter Age: ";
+    cin >> age;
+    while (age < 10 || age > 30)
+    {
+        cout << "Invalid age. Enter age between 10 and 30: ";
+        cin >> age;
+    }
+
+    // Input Grade
+    cout << "Enter Grade: ";
+    cin >> grade;
+    while (grade < 0 || grade > 100)
+    {
+        cout << "Invalid grade. Enter grade between 0 and 100: ";
+        cin >> grade;
+    }
+
+    studentRecords.push_back({id, fullName, age, grade});
+    cout << "\033[32m✅ Student added successfully!\033[0m\n";
+}
+
+// -----------------------# Display All Students
+void displayAllStudents()
+{
+    cout << "\n\033[33m---- List of Students ----\033[0m" << endl;
+
+    if (studentRecords.empty())
+    {
+        cout << "\033[31mNo students available.\033[0m" << endl;
+        return;
+    }
+
+    for (const auto &s : studentRecords)
+    {
+        cout << "ID: " << s.id << endl;
+        cout << "Full Name: " << s.fullName << endl;
+        cout << "Age: " << s.age << endl;
+        cout << "Grade: " << s.grade << endl;
+        cout << "----------------------" << endl;
+    }
+
+    cout << "Total Students: " << studentRecords.size() << endl;
+}
+
+// -----------------------# Find Student by ID
+void findStudentByID()
+{
+    if (studentRecords.empty())
+    {
+        cout << "\033[31mNo students available.\033[0m" << endl;
+        return;
+    }
+
+    cout << "\nEnter Student ID to search: ";
+    int id;
+    cin >> id;
+
+    auto it = find_if(studentRecords.begin(), studentRecords.end(),
+                      [id](const Student &s)
+                      { return s.id == id; });
+
+    if (it != studentRecords.end())
+    {
+        cout << "Full Name: " << it->fullName << endl;
+        cout << "Age: " << it->age << " | Grade: " << it->grade << endl;
+    }
+    else
+    {
+        cout << "\033[31mStudent not found!\033[0m" << endl;
+    }
+}
+
+// -----------------------# Delete Student by ID
+void deleteStudentByID()
+{
+    if (studentRecords.empty())
+    {
+        cout << "\033[31mNo students available.\033[0m" << endl;
+        return;
+    }
+
+    cout << "\nEnter Student ID to delete: ";
+    int id;
+    cin >> id;
+
+    auto it = find_if(studentRecords.begin(), studentRecords.end(),
+                      [id](const Student &s)
+                      { return s.id == id; });
+
+    if (it != studentRecords.end())
+    {
+        cout << "Full Name: " << it->fullName << endl;
+        cout << "Are you sure you want to delete this student? (Y/N): ";
+        char confirm;
+        cin >> confirm;
+        confirm = toupper(confirm);
+
+        if (confirm == 'Y')
+        {
+            studentRecords.erase(it);
+            cout << "\033[32m✅ Student deleted successfully.\033[0m" << endl;
+        }
+    }
+    else
+    {
+        cout << "\033[31mStudent not found!\033[0m" << endl;
+    }
+}
+
+// -----------------------# Main Function
+int main()
+{
+    studentRecords.push_back({1, "Ali Ahmed", 20, 85});
+    studentRecords.push_back({2, "Sara Benali", 22, 90});
+    studentRecords.push_back({3, "Khaled Othman", 19, 78});
+
+    while (true)
+    {
+        showMenu();
+        handleUserChoice();
+    }
+}
